@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:meallens_app/menueprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 // Define a StatefulWidget for the CameraPage
 class CameraPage extends StatefulWidget {
@@ -49,7 +51,23 @@ class _CameraPageState extends State<CameraPage> {
   // Camera Methods
   // Method to start the camera
   Future<void> startCamera() async {
+    // Request camera permission
+    var status = await Permission.camera.request();
+    if (status.isDenied) {
+      // Handle the case where the user denies the permission
+      // You can show a dialog or a message to the user
+      return;
+    }
+
+    // Check if there are any cameras available
     cameras = await availableCameras();
+    if (cameras.isEmpty) {
+      // Handle the case where no cameras are available
+      // You can show a dialog or a message to the user
+      return;
+    }
+
+    // Initialize the camera controller
     var backCamera = cameras.firstWhere(
           (camera) => camera.lensDirection == CameraLensDirection.back,
       orElse: () => cameras[0],
@@ -67,6 +85,8 @@ class _CameraPageState extends State<CameraPage> {
       if (kDebugMode) {
         print(e);
       }
+      // Handle the error during camera initialization
+      // You can show a dialog or a message to the user
     }
 
     // Return the initialization Future
